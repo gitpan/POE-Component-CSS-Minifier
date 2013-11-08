@@ -15,7 +15,9 @@ my $builder = Module::Build->new(
         'POE::Component::NonBlockingWrapper::Base' => 0.002,
         'CSS::Minifier'                            => 0.01,
         'LWP::UserAgent'                           => 2.036,
+        perl                                       => '5.006',
     },
+    configure_requires => { 'Module::Build' => 0 },
     add_to_cleanup      => [ 'POE-Component-CSS-Minifier-*' ],
     create_makefile_pl => 'traditional',
 );

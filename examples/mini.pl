@@ -3,22 +3,40 @@
 use strict;
 use warnings;
 use lib qw(lib ../lib);
-
 use POE qw/Component::CSS::Minifier/;
 
-my $poco = POE::Component::CSS::Minifier->spawn;
+die "Usage: $0 [URL or filename of CSS file to minify]\n"
+    unless @ARGV;
+
+my $In_File = shift;
+my $Out_File = 'out_' . time() . '.css';
+
+my $poco = POE::Component::CSS::Minifier->spawn(
+    ua_args => { agent => 'Firefox' },
+);
 
 POE::Session->create( package_states => [ main => [qw(_start results)] ], );
 
 $poe_kernel->run;
 
 sub _start {
-    $poco->minify(
-        { event => 'results', infile => 'div:hover { border: 1px solid #000; }' }
-    );
+    $poco->minify({
+            event => 'results',
+            outfile => $Out_File,
+            (
+                $In_File =~ m{^https?://}
+                ? ( uri     => $In_File, )
+                : ( infile  => $In_File, )
+            ),
+    });
 }
 
 sub results {
-    print "Minified CSS:\n$_[ARG0]->{out}\n";
+    if ( defined $_[ARG0]->{error} ) {
+        print "Error: $_[ARG0]->{error}\n";
+    }
+    else {
+        print "Minified CSS saved in file $_[ARG0]->{outfile}\n";
+    
     $poco->shutdown;
 }

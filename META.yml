@@ -1,24 +1,28 @@
 ---
-name: POE-Component-CSS-Minifier
-version: 0.0101
+abstract: 'non-blocking wrapper around CSS::Minifier with URI fetching abilities'
 author:
   - "Zoffix <'zoffix@cpan.org'>"
-abstract: non-blocking wrapper around CSS::Minifier with URI fetching abilities
+build_requires:
+  Test::More: 0
+configure_requires:
+  Module::Build: 0
+dynamic_config: 1
+generated_by: 'Module::Build version 0.4007, CPAN::Meta::Converter version 2.132830'
 license: perl
-resources:
-  license: http://dev.perl.org/licenses/
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: POE-Component-CSS-Minifier
+provides:
+  POE::Component::CSS::Minifier:
+    file: lib/POE/Component/CSS/Minifier.pm
+    version: 0.0102
 requires:
   CSS::Minifier: 0.01
   LWP::UserAgent: 2.036
   POE: 0.9999
   POE::Component::NonBlockingWrapper::Base: 0.002
-build_requires:
-  Test::More: 0
-provides:
-  POE::Component::CSS::Minifier:
-    file: lib/POE/Component/CSS/Minifier.pm
-    version: 0.0101
-generated_by: Module::Build version 0.2808
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+  perl: 5.006
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.0102

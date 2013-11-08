@@ -3,7 +3,7 @@ package POE::Component::CSS::Minifier;
 use warnings;
 use strict;
 
-our $VERSION = '0.0101';
+our $VERSION = '0.0102';
 
 use POE;
 use base 'POE::Component::NonBlockingWrapper::Base';
@@ -20,55 +20,59 @@ sub minify {
 
 sub _process_request {
     my ( $self, $in_ref ) = @_;
-eval {
-    if ( defined $in_ref->{infile} ) {
-        open my $in, '<', $in_ref->{infile}
-            or $in_ref->{error} = "infile error [$!]"
-            and return;
-
-        if ( defined $in_ref->{outfile} ) {
-            open my $out, '>', $in_ref->{outfile}
-                or $in_ref->{error} = "outfile error [$!]"
+    
+    eval {
+        if ( defined $in_ref->{infile} ) {
+            open my $in, '<', $in_ref->{infile}
+                or $in_ref->{error} = "infile error [$!]"
                 and return;
 
-            CSS::Minifier::minify( input => $in, outfile => $out );
-        }
-        else {
-            $in_ref->{out} = CSS::Minifier::minify( input => $in );
-        }
-    }
-    elsif ( $in_ref->{uri} ) {
-        my $response
-        = LWP::UserAgent->new( %{ $self->{ua_args} || {} } )->get( $in_ref->{uri} );
-
-        if ( $response->is_success ) {
+               
             if ( defined $in_ref->{outfile} ) {
                 open my $out, '>', $in_ref->{outfile}
                     or $in_ref->{error} = "outfile error [$!]"
                     and return;
 
-                CSS::Minifier::minify(
-                    input => $response->decoded_content,
-                    outfile => $out,
-                );
+                CSS::Minifier::minify( input => $in, outfile => $out );
             }
             else {
-                $in_ref->{out} = CSS::Minifier::minify( input => $response->decoded_content );
+                $in_ref->{out} = CSS::Minifier::minify( input => $in );
+            }
+        }
+        elsif ( $in_ref->{uri} ) {
+            my $response
+            = LWP::UserAgent->new( %{ $self->{ua_args} || {} } )->get( $in_ref->{uri} );
+
+            if ( $response->is_success ) {
+                if ( defined $in_ref->{outfile} ) {
+                    open my $out, '>', $in_ref->{outfile}
+                        or $in_ref->{error} = "outfile error [$!]"
+                        and return;
+
+                    CSS::Minifier::minify(
+                        input => $response->decoded_content,
+                        outfile => $out,
+                    );
+                }
+                else {
+                    $in_ref->{out} = CSS::Minifier::minify( input => $response->decoded_content );
+                }
+            }
+            else {
+                $in_ref->{error} = $response->status_line;
             }
         }
         else {
-            $in_ref->{error} = $response->status_line;
+            $in_ref->{out} = CSS::Minifier::minify( input => $in_ref->{in} );
         }
-    }
-    else {
-        $in_ref->{out} = CSS::Minifier::minify( input => $in_ref->{in} );
-    }
-};
-$@ and $in_ref->{out} = "ERROR: $@";
+    };
+    $@ and $in_ref->{out} = "ERROR: $@";
 }
 
 1;
 __END__
+
+=encoding utf8
 
 =head1 NAME
 
